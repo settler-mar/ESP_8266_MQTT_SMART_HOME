@@ -1,0 +1,73 @@
+{
+  "type":"form",
+  "title":"PID temperature",
+  "url":"pid_temp",
+  "data":[
+    {
+      "type":"multiinput",
+      "title":"MQTT данные регулируемой температуры (до 10 датчиков)",
+      "name":"pid_temp_in_mqtt",
+      "maxLine":10
+    },
+    {
+      "type":"input",
+      "title":"Вывод в MQTT средней расчетной температуры",
+      "name":"pid_temp_in_v"
+    },
+    {
+      "type":"input",
+      "title":"MQTT адрес задания температуры",
+      "name":"pid_z_mqtt"
+    },
+    {
+      "type":"input",
+      "title":"Заданная температура",
+      "name":"pid_z"
+    },
+    {
+      "type":"input",
+      "title":"MQTT температуры насителя(воздействия)(измерение)",
+      "name":"pid_out_mqtt"
+    },
+    {
+      "type":"input",
+      "title":"MQTT температуры насителя(воздействия)(задание)",
+      "name":"pid_out_mqtt_z"
+    },
+    {
+      "type":"input",
+      "title":"MQTT адрес реле включения нагрева насителя(управоение воздействием)",
+      "name":"pid_out_relay_mqtt"
+    },
+    {
+      "type":"input",
+      "title":"Допустимая отклоенени температуры носителя",
+      "name":"pid_out_d"
+    },
+    {
+      "type":"input",
+      "title":"Максимум воздействия",
+      "name":"pid_out_max"
+    },
+    {
+      "type":"input",
+      "title":"Kp-насколько агрессивно PID реагирует на текущую величину ошибки (Proportional)",
+      "name":"pid_p"
+    },
+    {
+      "type":"input",
+      "title":"Ki-насколько агрессивно PID реагирует на ошибку с течением времени (Integral)",
+      "name":"pid_i"
+    },
+    {
+      "type":"input",
+      "title":"Kd-насколько агрессивно PID реагирует на изменение ошибки (Derivative)",
+      "name":"pid_d"
+    },
+    {
+      "type":"input",
+      "title":"Интервал обновления PID",
+      "name":"pid_t"
+    }
+  ]
+}

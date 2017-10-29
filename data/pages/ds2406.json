@@ -1,0 +1,40 @@
+{
+  "type":"form",
+  "title":"DS2406",
+  "url":"ds2406",
+  "data":[
+    {
+      "type":"text",
+      "title":"",
+      "name":"code",
+      "prefix":"Code: "
+    },
+    {
+      "type":"radio",
+      "title":"Role",
+      "value":{
+        "1":"Input",
+        "2":"Output"
+      },
+      "name":"role"
+    },
+    {
+      "type":"radio",
+      "title":"Invert",
+      "value":{
+        "0":"Off",
+        "1":"On"
+      },
+      "name":"invert_"
+    },
+    {
+      "type":"hidden",
+      "name":"code"
+    },
+    {
+      "type":"input",
+      "title":"MQTT adress",
+      "name":"mqtt"
+    }
+  ]
+}

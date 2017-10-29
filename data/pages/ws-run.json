@@ -1,0 +1,47 @@
+{
+  "type":"form",
+  "title":"WS RUN",
+  "url":"ws_run",
+  "data":[
+    {
+      "type":"input",
+      "title":"Ограничение аналогового сигнала",
+      "name":"max_analog"
+    },
+    {
+      "type":"input",
+      "title":"Минимальный уровень подсветки",
+      "name":"min_brightness"
+    },
+    {
+      "type":"input",
+      "title":"Яркость при которой не запускать",
+      "name":"off_analog"
+    },
+    {
+      "type":"input",
+      "title":"Шаги диммирования",
+      "name":"dim_step"
+    },
+    {
+      "type":"input",
+      "title":"Минимальное время подсветки",
+      "name":"wait_time"
+    },
+    {
+      "type":"input",
+      "title":"MQTT верхнего датчика",
+      "name":"mqtt_up"
+    },
+    {
+      "type":"input",
+      "title":"MQTT нижнего датчика",
+      "name":"mqtt_dwn"
+    },
+    {
+      "type":"input",
+      "title":"MQTT аналогового датчика",
+      "name":"mqtt_analog"
+    }
+  ]
+}

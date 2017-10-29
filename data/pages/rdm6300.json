@@ -1,0 +1,12 @@
+{
+  "type":"form",
+  "title":"RDM6300",
+  "url":"rdm6300",
+  "data":[
+        {
+      "type":"input",
+      "title":"MQTT adress",
+      "name":"mqtt"
+    }
+  ]
+}

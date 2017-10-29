@@ -1,0 +1,16 @@
+{
+  "type":"form",
+  "title":"DHT",
+  "url":"/dht11",
+  "data":[
+    {
+      "type":"input",
+      "title":"MQTT for tem",
+      "name":"mqtt_temp"
+    },{
+      "type":"input",
+      "title":"MQTT fot humidity",
+      "name":"mqtt_hum"
+    }
+  ]
+}

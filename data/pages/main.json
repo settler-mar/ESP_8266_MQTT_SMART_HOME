@@ -1,0 +1,27 @@
+{
+  "type":"form",
+  "title":"Start page",
+  "url":"/main",
+  "data":[
+    {
+      "type":"input",
+      "title":"SSID",
+      "name":"ssid"
+    },
+    {
+      "type":"input",
+      "title":"WIFI password",
+      "name":"password"
+    },
+    {
+      "type":"input",
+      "title":"MQTT server",
+      "name":"mqtt_server"
+    },
+    {
+      "type":"input",
+      "title":"Интервал обновления температуры (в секундах. Минимум 3.)",
+      "name":"temp_interval"
+    }
+  ]
+}

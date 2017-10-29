@@ -1,0 +1,25 @@
+{
+  "type":"form",
+  "title":"DS2450",
+  "url":"/ds2450",
+  "data":[
+    {
+      "type":"text",
+      "title":"",
+      "name":"code",
+      "prefix":"Code: "
+    },
+    {
+      "type":"input",
+      "title":"MQTT adress",
+      "name":"mqtt"
+    },{
+      "type":"input",
+      "title":"Интервал обновления (в секундах. Минимум 3.)",
+      "name":"intrval"
+    },{
+      "type":"hidden",
+      "name":"code"
+    }
+  ]
+}

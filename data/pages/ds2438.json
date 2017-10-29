@@ -1,0 +1,31 @@
+{
+  "type":"form",
+  "title":"DS2438",
+  "url":"/ds2438",
+  "data":[
+    {
+      "type":"text",
+      "title":"",
+      "name":"code",
+      "prefix":"Code: "
+    },
+    {
+      "type":"input",
+      "title":"MQTT adress temp",
+      "name":"mqtt_t"
+    },
+    {
+      "type":"input",
+      "title":"MQTT adress analog",
+      "name":"mqtt_v"
+    },{
+      "type":"input",
+      "title":"Интервал обновления (в секундах. Минимум 3.)",
+      "name":"intrval"
+    },
+    {
+      "type":"hidden",
+      "name":"code"
+    }
+  ]
+}

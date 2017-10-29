@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ESP8266</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      @import url(style.css);
+    </style>
+  </head>
+<body>
+
+<div class=wrapper>
+  <header>
+    <div id="site_title">
+      <h1><a href="#">ESP8266 <span>config</span></a></h1>
+    </div>
+    <nav id="menu">
+    </nav>
+  </header>
+
+  <section id=main default>
+    <h2>
+      <span class=bg></span>
+      <span class=text>Start page</span>
+    </h2>
+    <div class=content>
+      добропожаловать в конфигуратор.
+    </div>
+  </section>
+
+</div>
+
+<script type="text/javascript" src="spa.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    spa_page.init({nav:{url:'/nav.json',parant:'nav#menu'}})
+  });
+
+</script>
+</body>
+</html>

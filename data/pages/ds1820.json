@@ -1,0 +1,28 @@
+{
+  "type":"form",
+  "title":"DS18B20 family",
+  "url":"/ds1820",
+  "data":[
+    {
+      "type":"text",
+      "title":"",
+      "name":"code",
+      "prefix":"Code: "
+    },
+    {
+      "type":"text",
+      "prefix":"Temperature ",
+      "name":"temper",
+      "sufix":" &#176;C"
+    },
+    {
+      "type":"input",
+      "title":"MQTT adress",
+      "name":"mqtt"
+    },
+    {
+      "type":"hidden",
+      "name":"code"
+    }
+  ]
+}

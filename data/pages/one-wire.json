@@ -1,0 +1,22 @@
+{
+  "type":"table",
+  "title":"One wire",
+  "url":"/one-wire",
+  "data":[
+    {
+      "type":"counter",
+      "title":"#"
+    },
+    {
+      "type":"href",
+      "title":"Type",
+      "name":"href",
+      "description":"type"
+    },
+    {
+      "type":"text",
+      "title":"CODE",
+      "name":"code"
+    }
+  ]
+}
