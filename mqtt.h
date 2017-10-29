@@ -1,24 +1,6 @@
 // sudo /etc/init.d/mosquitto start
 // https://github.com/256dpi/arduino-mqtt/blob/master/examples/AdafruitHuzzahESP8266/AdafruitHuzzahESP8266.ino
-/*
-void callback_mqtt(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
 
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    //digitalWrite(BUILTIN_LED, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is acive low on the ESP-01)
-  } else {
-    //digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
-}*/
 int subsribe;
 
 void mqtt_pub(String mqtt_addr,String data){
@@ -42,6 +24,10 @@ void DS24_set(byte addr[8],byte val){
   }
 //  Serial.println(addr[0]);
 //  Serial.println(val);
+
+  if(addr[0]==0x85 && (val & 4)){
+    val=val+2;
+  }
   if(addr[0]==0x29||addr[0]==0x85){
     ds.reset();
     ds.select(addr);
@@ -153,8 +139,6 @@ void mqtt_24(){
         buf=buf&ds24_data[i].role;
       }
            
-      //Serial.print(buf);
-
       #ifdef UN_drebizg
         byte t_buf=buf;
         byte t_buf_n=buf;

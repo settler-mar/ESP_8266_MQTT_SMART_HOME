@@ -141,7 +141,8 @@ void loadOneWere(){
                   String mqtt;
                   /*mqtt=ds24_data[ds_24_cnt].mqtt+"/*";
                   mqtt_add_out(mqtt);*/        
-                  byte role=~ds24_data[ds_24_cnt].role&msk;
+                  byte role=~ds24_data[ds_24_cnt].role;
+                  role=role&msk;
                   byte val=1;
                   for (int j=0;j<8;j++){
                     if(val & role){
