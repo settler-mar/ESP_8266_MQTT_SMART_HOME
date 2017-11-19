@@ -5,10 +5,11 @@ int subsribe;
 
 void mqtt_pub(String mqtt_addr,String data){
   if(mqtt_addr.length()<5)return;
+  if(start_init) return;
   Serial.print(mqtt_addr);
   Serial.print(" - ");
   Serial.println(data);
-  if (mqtt.connected()) {
+  if (mqtt_connect) {
     mqtt.publish(mqtt_addr,data);
   }
 }
@@ -213,7 +214,7 @@ void mqtt_subscribe(){
     Serial.print(") ");
     Serial.println(mqtt_output[i]);
     
-    if (mqtt_output[i].length()>5 && mqtt.connected()) {
+    if (mqtt_output[i].length()>5 && mqtt_connect) {
       /*if(initController){
         mqtt_pub(mqtt_output[i],"0");
       }*/

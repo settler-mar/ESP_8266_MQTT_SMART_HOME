@@ -8,6 +8,9 @@
 //#define run_lesnica // контролер подсветка лесницы
 //#define ESP_kitchen
 
+//1Mb/256 - ESP-01 - черный
+//512/128 - ESP-01 - синий
+
 //#define DEBUG_ENABLE
 #define UN_drebizg 2
 #define T_PERIOD 10 //период кратности для опроса датчиков
@@ -129,7 +132,7 @@
   #define ws2812_run_up_pin D0
   #define ws2812_run_dwn_pin D1
   #define PIN_ws         D2
-  #define NUMPIXELS      16
+  #define NUMPIXELS      24
   #define ws2812_run_analog_pin A0
 
   #define FILE_EDIT

@@ -17,6 +17,9 @@ ESP8266WebServer server(80);
 
 #include <MQTTClient.h>
 
+byte start_init = 255;
+byte mqtt_connect;
+
 #ifdef PID_TEMP
   String pid_temp_in_mqtt[10];
   float  pid_temp_in[10];

@@ -59,13 +59,16 @@ void setup(void){
   WiFi.mode(WIFI_OFF);
   delay(1500);
 
+  String n1=String(ESP.getChipId());
+  WiFi.hostname(n1);
+  
   //ESP.restart();
 
   Serial.println();
 
   Serial.print("Chip id ");
   Serial.println(ESP.getChipId());
-  
+
   Serial.print("Chip size ");
   Serial.println(ESP.getFlashChipRealSize());
 
@@ -178,6 +181,11 @@ void setup(void){
     mqtt_init();
 
   };
+  #ifdef PID_TEMP
+    start_init = t_sec>UN_drebizg*3);
+  #else
+    start_init=15;
+  #endif
   
   server_init();
   initController=false;
@@ -188,14 +196,20 @@ void loop(void){
     t_sec = millis() / (1000 / T_PERIOD);
     
     if(t_sec!=last_sec){
-      if ((t_sec % T_PERIOD == 0) && !mqtt.connected()) {
+      mqtt.loop();
+      mqtt_connect=mqtt.connected();
+      if ((t_sec % T_PERIOD == 0) && !mqtt_connect) {
         mqtt_init();
       }else{
-        if(mqtt.connected() && subsribe==0){
+        if(mqtt_connect && subsribe==0){
           mqtt_subscribe();
         }
       }
-      
+
+      if(start_init){
+        start_init=start_init-1;
+      }
+
       volt_read(t_sec);
       volt_2450_read(t_sec);
 
@@ -205,19 +219,15 @@ void loop(void){
 
       
       byte temp_period=(t_sec % (config.temp_interval * T_PERIOD));
-      //Serial.println(temp_period);
-      /*if(temp_period==T_PERIOD){
-        calculate_temp();
-      }*/
       if(temp_period % T_PERIOD == 0){
-        if (mqtt.connected()) {
+        if (mqtt_connect) {
           mqtt_temp(temp_period / T_PERIOD);
         }
         calculate_temp(temp_period / T_PERIOD);
       }
        
       if(temp_period==config.temp_interval * T_PERIOD-2){
-        if (mqtt.connected()) {
+        if (mqtt_connect) {
           //mqtt_temp();
           #ifdef DHT11_PIN
             DHT11_read();
@@ -245,12 +255,12 @@ void loop(void){
   
       //Serial.println(t_sec);
       mqtt_24();    
-      if (mqtt.connected()) {
-       mqtt.loop();
-      }
       //Serial.println();
       last_sec=t_sec;
+
+      server.handleClient();
     }
+  }else{
+    server.handleClient();
   }
-  server.handleClient();
 }

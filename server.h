@@ -24,7 +24,6 @@ void indexPage(){
 
 void softRestart(){ESP.reset();}
 void main_config(){
-
   if (server.hasArg("mqtt_server")){
     config.ssid = server.arg("ssid");
     config.password = server.arg("password");
@@ -135,20 +134,28 @@ void nav_menu(){
   #endif
   
 
-
-
   /*  {
       JsonObject& data = root.createNestedObject();
       data["title"]="restart";
       data["url"]="/restart";
     }*/
-    
-  String out;
+
+  File configFile = SPIFFS.open("/nav.json", "w");
+  if (!configFile) {
+    Serial.println("Failed to open config file for writing");
+    return;
+  }
+
+  root.printTo(configFile);
+  Serial.println("Create new menu (nav.json");
+  /*String out;
   root.printTo(out);
-  server.send ( 200, "text/html", out );
+  server.send ( 200, "text/html", out );*/
 }
 
 void server_init(){
+  nav_menu();
+  
   server.on ( "/", indexPage );
   server.on ( "/main", main_config );
   server.on ( "/one-wire", ds_list_find );
@@ -159,7 +166,7 @@ void server_init(){
   server.on ( "/ds2450",ds2450_config);
     
   server.on ( "/restart",softRestart);
-  server.on ( "/nav.json", nav_menu);
+  //server.on ( "/nav.json", nav_menu);
 
   #ifdef DHT11_PIN
     server.on ( "/dht11",dht11_config);

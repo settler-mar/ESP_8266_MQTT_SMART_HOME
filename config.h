@@ -32,6 +32,7 @@ boolean loadConfig() {
     return false;
   }
 
+  
   const char *ssid=configJSON["ssid"];
   const char *password=configJSON["password"];
   WiFi.begin ( ssid, password);
