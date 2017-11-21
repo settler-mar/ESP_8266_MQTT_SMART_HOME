@@ -115,10 +115,28 @@ void calculate_temp(byte i){
   }
 #else
   if(i==0){
+
+    ds.reset();
+    ds.write(0xCC);
+    ds.write(0x4E, 1);
+    
+    ds.write(0, 1);
+    ds.write(0, 1);
+    //ds.write(0x1F, 1); //9 bit - 93ms - 0.5*C
+    //ds.write(0x3F, 1); //10 bit - 187 ms - 0.25*C
+    ds.write(0x5F, 1); //11 bit - 375 ms - 0.125*C
+    //ds.write(0x7F, 1); //12 bit - 750 ms - 0.0625*C
+  
+  
+    ds.reset(); // reset 1-Wire
+    ds.write(0xCC); // select DS18B20
+    ds.write(0x48); // copy scratchpad to EEPROM
+    delay(15); // wait for end of write
+  
     ds.reset();
     ds.write(0xCC);   //обращаюсь ко всем
     ds.write(0x44);   // start conversion, with parasite power on at the end
-    return;
+    delay(200);
   }
 #endif
 }

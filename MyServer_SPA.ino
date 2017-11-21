@@ -198,6 +198,7 @@ void loop(void){
     if(t_sec!=last_sec){
       mqtt.loop();
       mqtt_connect=mqtt.connected();
+      
       if ((t_sec % T_PERIOD == 0) && !mqtt_connect) {
         mqtt_init();
       }else{

@@ -147,7 +147,7 @@ void nav_menu(){
   }
 
   root.printTo(configFile);
-  Serial.println("Create new menu (nav.json");
+  Serial.println("Create new menu (nav.json)");
   /*String out;
   root.printTo(out);
   server.send ( 200, "text/html", out );*/

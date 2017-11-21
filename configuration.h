@@ -1,9 +1,9 @@
-//#define ESP_01
+#define ESP_01
 //#define ESP_NODE_MCU
 //#define ESP_2floor
 //#define ESP_GARDEN //для улицы ворота
 //#define ESP_KOTEL
-#define ESP_2BUTTON //для зала/детской/коридора на выключатели
+//#define ESP_2BUTTON //для зала/детской/коридора на выключатели
 //#define ESP_cherdak //чердак 
 //#define run_lesnica // контролер подсветка лесницы
 //#define ESP_kitchen
@@ -25,7 +25,7 @@
 
   #define FILE_EDIT
 
-  #define DS_1820_personal_convert
+  //#define DS_1820_personal_convert
 #endif
 
 #ifdef ESP_NODE_MCU
