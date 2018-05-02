@@ -1,8 +1,20 @@
+#include <string.h>
 #include "configuration.h"
 #include "global.h"
 #include "helpers.h"
 #include "mqtt.h"
+
 #include "config.h"
+
+
+#ifdef ESP_auth_def
+  #include "auth.h"
+#endif
+
+#ifdef wifi_ota
+  #include <ArduinoOTA.h>
+  boolean wifi_ota_run=false;
+#endif
 
 #ifdef BMP180
   #include <Adafruit_Sensor.h>
@@ -16,8 +28,12 @@
   #include "DHT11_.h"
 #endif
 
-#ifdef FILE_EDIT
+//#ifdef FILE_EDIT
   #include "file_edit.h"
+//#endif
+
+#ifdef RC433_PORT
+  #include "rc433.h"
 #endif
 
 
@@ -41,12 +57,22 @@
   #include "ws2812_run.h"
 #endif
 
-#include "onewire_help.h"
-#include "ds18b20.h"
-#include "DS2406.h"
-#include "ds2408.h"
-#include "ds2438.h"
-#include "ds2450.h"
+#ifdef WS_PIN
+  #include "WS2812FX.h"
+#endif
+
+#ifdef ONE_WIRE_PORT
+  #include "onewire_help.h"
+  #include "ds18b20.h"
+  #include "DS2406.h"
+  #include "ds2408.h"
+  #include "ds2438.h"
+  #include "ds2450.h"
+#endif
+
+#ifdef MCP
+  #include "mcp23017.h";
+#endif
 
 #ifdef Alarm_mode
   #include "Alarm_modem.h"
@@ -63,8 +89,6 @@ void setup(void){
   WiFi.hostname(n1);
   
   //ESP.restart();
-
-  Serial.println();
 
   Serial.print("Chip id ");
   Serial.println(ESP.getChipId());
@@ -96,6 +120,18 @@ void setup(void){
 
   if (!SPIFFS.begin()) {
     Serial.println("Failed to mount file system");
+  }else{
+    FSInfo fs_info;
+    SPIFFS.info(fs_info);
+   
+    Serial.print("FS size total ");
+    Serial.println(formatBytes(fs_info.totalBytes));
+    
+    Serial.print("FS size used ");
+    Serial.println(formatBytes(fs_info.usedBytes));
+
+    Serial.print("FS max path length ");
+    Serial.println(fs_info.maxPathLength);
   }
 
   //SPIFFS.format();
@@ -109,7 +145,9 @@ void setup(void){
     defaultConfig();
   #endif
 
-  loadOneWere();
+  #ifdef ONE_WIRE_PORT
+    loadOneWere();
+  #endif
   
   //WiFi.begin ( config.ssid, config.password);
   Serial.println("");
@@ -119,6 +157,7 @@ void setup(void){
   #ifdef DHT11_PIN
     DHT_init();
   #endif
+  
   #ifdef BMP180
     BMP180_init();
   #endif
@@ -126,9 +165,11 @@ void setup(void){
   #ifdef analog_pin
     analog_init();
   #endif
+  
   #ifdef RDM6300
     RDM6300_init();
   #endif
+  
   #ifdef PID_TEMP
     PID_TEMP_init();
   #endif
@@ -138,6 +179,10 @@ void setup(void){
     ws2812_run_init();
   #endif
   
+  #ifdef WS_PIN
+    ws2812_init();
+  #endif
+
   if(debug_mode){
     WiFi.mode(WIFI_AP);
     /* You can remove the password parameter if you want the AP to be open. */
@@ -189,6 +234,41 @@ void setup(void){
   
   server_init();
   initController=false;
+
+  #ifdef ESP_auth_def
+    auth_init();
+  #endif
+
+  #ifdef RC433_PORT
+    rc433_init();
+  #endif
+
+  #ifdef MCP
+    mcp_setup();
+  #endif
+
+  #ifdef wifi_ota
+    #include <ArduinoOTA.h>
+      ArduinoOTA.onStart([]() {
+      Serial.println("OTA start");
+    });
+    ArduinoOTA.onEnd([]() {
+      Serial.println("\nOTA end");
+    });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    });
+    ArduinoOTA.onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+    ArduinoOTA.begin();
+  
+  #endif
 }
 
 void loop(void){ 
@@ -211,8 +291,11 @@ void loop(void){
         start_init=start_init-1;
       }
 
-      volt_read(t_sec);
-      volt_2450_read(t_sec);
+      #ifdef ONE_WIRE_PORT
+        volt_read(t_sec);
+        volt_2450_read(t_sec);
+      #endif
+
 
       #ifdef PID_TEMP
         PID_analiz(t_sec);
@@ -220,12 +303,15 @@ void loop(void){
 
       
       byte temp_period=(t_sec % (config.temp_interval * T_PERIOD));
-      if(temp_period % T_PERIOD == 0){
-        if (mqtt_connect) {
-          mqtt_temp(temp_period / T_PERIOD);
+      #ifdef ONE_WIRE_PORT
+        if(temp_period % T_PERIOD == 0){
+          if (mqtt_connect) {
+            mqtt_temp(temp_period / T_PERIOD);
+          }
+          calculate_temp(temp_period / T_PERIOD);
         }
-        calculate_temp(temp_period / T_PERIOD);
-      }
+      #endif
+
        
       if(temp_period==config.temp_interval * T_PERIOD-2){
         if (mqtt_connect) {
@@ -253,7 +339,15 @@ void loop(void){
       #ifdef ws2812_run
         ws2812_run_do(t_sec);
       #endif
-  
+      
+      #ifdef RC433_PORT
+        rc433_do();
+      #endif
+
+      #ifdef MCP
+        mcp_loop();
+      #endif
+      
       //Serial.println(t_sec);
       mqtt_24();    
       //Serial.println();
@@ -261,7 +355,16 @@ void loop(void){
 
       server.handleClient();
     }
+
+    #ifdef WS_PIN
+      ws2812_run();
+    #endif
   }else{
     server.handleClient();
   }
+  #ifdef wifi_ota
+    if(wifi_ota_run){
+      ArduinoOTA.handle();
+    }
+  #endif   
 }

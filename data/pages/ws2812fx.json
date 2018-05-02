@@ -1,0 +1,49 @@
+{
+  "type":"form",
+  "title":"WS FX",
+  "url":"ws2812fx",
+  "data":[
+    {
+      "name":"mqtt_in",
+      "title":"MQTT вход",
+      "type":"input"
+    },
+    {
+      "name":"mqtt_out",
+      "title":"MQTT выход",
+      "type":"input"
+    },
+    {
+      "name":"led_z",
+      "title":"Количество сегментов",
+      "type":"input"
+    },
+    {
+      "name":"led_d",
+      "title":"Смещение 1-го",
+      "type":"input"
+    },
+    {
+      "name":"micro_step_d",
+      "title":"Время микрошага",
+      "type":"input"
+    },
+    {
+      "name":"step_d",
+      "title":"Микрошагов в шаге",
+      "type":"input"
+    },
+    {
+      "name":"dir",
+      "title":"Направление",
+      "type":"checkbox",
+      "value":{
+        "1":""
+      },
+      "state":{
+        "on":"<",
+        "off":">"
+      }
+    }
+  ]
+}

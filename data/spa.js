@@ -1,5 +1,6 @@
 var rule_list = {};
 var spa_page = (function() {
+  var base_url='/';
     var option ={
       all_section: false,
       def:false,
@@ -26,6 +27,8 @@ var spa_page = (function() {
       this.all_section=document.querySelectorAll('section');
       this.all_section.forEach(function(el){
         el.classList.remove("show");
+        content=el.getElementsByClassName('content')
+        content[0].innerHTML="";
       })
 
       if(!(this_page=document.getElementById(pageName))){
@@ -99,6 +102,7 @@ var spa_page = (function() {
     }
 
     function init(params){
+      base_url='/';
       if(params){
         if(params.nav){
           this.nav=params.nav.parant;
@@ -106,6 +110,17 @@ var spa_page = (function() {
         }
         if(params.costume_function){
           this.costume_function=params.costume_function;
+        }
+        if(!params.costume_function ||
+          !params.costume_function.base_url ||
+          typeof(params.costume_function.base_url)=="undefined")
+        {
+          base_url="/";
+        }else{
+          base_url=params.costume_function.base_url;
+          if(base_url[base_url.length-1]!='/'){
+            base_url+='/';
+          }
         }
       }
 
@@ -147,7 +162,13 @@ var spa_page = (function() {
 
   function getPost(url,data,callback,type) {
     var xmlhttp = getXmlHttp(); // Создаём объект XMLHTTP
-    xmlhttp.open(type||'POST', url, true); // Открываем асинхронное соединение
+    if(url[0]=='/'){
+      url=url.substring(1);
+    }
+    if(!base_url || typeof(base_url)=="undefined"){
+      var base_url="/";
+    }
+    xmlhttp.open(type||'POST', base_url+url, true); // Открываем асинхронное соединение
     xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); // Отправляем кодировку
     if(typeof(data)!="string"){
       data=arrayToQueryString(data);

@@ -21,9 +21,9 @@ void BMP180_init(){
   }else{
      bmp_185.mqtt_temp = root["mqtt_temp"].as<String>();
      bmp_185.mqtt_pre = root["mqtt_pre"].as<String>();
-     bmp_185.active = true;    
+     bmp_185.active = true;
   }
-  
+
   if (!bmp.begin()) {
     Serial.println("Could not find a valid BMP085 sensor, check wiring!");
   }
@@ -35,20 +35,20 @@ void BMP180_read(){
 
   if(bmp_185.active){
     mqtt_pub(bmp_185.mqtt_temp,String(bmp.readTemperature()));
-    
+
     /*Serial.print("Temperature = ");
     Serial.print(bmp.readTemperature());
     Serial.println(" *C");*/
-      
+
     //bmp.readTemperature() //температура в цельсиях
-  
+
     //Serial.print("Pressure = ");
     pa = (float)bmp.readPressure();
     #ifdef BMP180 == 2
       pa=pa/133.322;
     #endif
 
-    mqtt_pub(bmp_185.mqtt_pre,String(pa));  
+    mqtt_pub(bmp_185.mqtt_pre,String(pa));
     /*Serial.print(pa);
     Serial.println("");*/
   }
@@ -63,9 +63,9 @@ void bmp180_config(){
      bmp_185.mqtt_pre = server.arg("mqtt_pre");
      bmp_185.active = true;
   }
-  
+
   root["mqtt_temp"] = bmp_185.mqtt_temp;
-  root["mqtt_pre"]  = bmp_185.mqtt_pre; 
+  root["mqtt_pre"]  = bmp_185.mqtt_pre;
 
   if (server.hasArg("mqtt_temp")||server.hasArg("mqtt_pre")){
     File configFile = SPIFFS.open("/bmp180.json", "w");
@@ -75,12 +75,11 @@ void bmp180_config(){
     }
     root.printTo(configFile);
     configFile.close();
-    
+
     root["msg"]="Data updated.";
   }
-  
+
   String out;
   root.printTo(out);
   server.send ( 200, "text/html", out );
 }
-

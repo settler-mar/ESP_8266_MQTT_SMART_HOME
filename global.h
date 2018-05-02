@@ -13,7 +13,12 @@ ESP8266WebServer server(80);
 
 #include <ArduinoJson.h>
 #include "FS.h"
-#include <OneWire.h>
+#include <Wire.h>
+
+
+#ifdef ONE_WIRE_PORT
+  #include <OneWire.h>
+#endif
 
 #include <MQTTClient.h>
 
@@ -31,7 +36,7 @@ byte mqtt_connect;
   String pid_out_mqtt_z;
   String pid_temp_in_v;
   String pid_out_relay_mqtt;
-    byte pid_relay_status;
+  byte pid_relay_status;
   double  pid_out_t;
   double  pid_out;
   float pid_out_d;
@@ -75,7 +80,10 @@ byte mqtt_connect;
 #endif
 
 boolean initController=true;
-OneWire ds(ONE_WIRE_PORT);
+
+#ifdef ONE_WIRE_PORT
+  OneWire ds(ONE_WIRE_PORT);
+#endif
 
 WiFiClient espClient;
 MQTTClient mqtt;
@@ -86,6 +94,9 @@ struct Config_srtuct {
   String mqtt_server;
   char* mac;
   int temp_interval;
+  String mqtt_user;
+  String mqtt_pass;
+  String mqtt_name;
 } config;
 
 byte last_sec,t_sec;

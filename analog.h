@@ -32,7 +32,7 @@ void analog_init(){
      analog_mqtt = root["mqtt"].as<String>();
      analog_intrval=StringToInt(root["intrval"].as<String>());
      if(analog_intrval<3)analog_intrval=3;
-     analog_active = true;    
+     analog_active = true;
   }
 }
 
@@ -47,7 +47,7 @@ void analog_config(){
      if(analog_intrval<3)analog_intrval=3;
      analog_active = true;
   }
-  
+
   root["mqtt"] = analog_mqtt;
   root["intrval"]=analog_intrval;
 
@@ -59,12 +59,11 @@ void analog_config(){
     }
     root.printTo(configFile);
     configFile.close();
-    
+
     root["msg"]="Data updated.";
   }
-  
+
   String out;
   root.printTo(out);
   server.send ( 200, "text/html", out );
 }
-

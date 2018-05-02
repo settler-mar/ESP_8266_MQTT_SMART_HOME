@@ -15,8 +15,23 @@
     },
     {
       "type":"input",
+      "title":"Название",
+      "name":"mqtt_name"
+    },
+    {
+      "type":"input",
       "title":"MQTT server",
       "name":"mqtt_server"
+    },
+    {
+      "type":"input",
+      "title":"MQTT user(если без авторизации то не заполнять)",
+      "name":"mqtt_user"
+    },
+    {
+      "type":"input",
+      "title":"MQTT pass(если без авторизации то не заполнять)",
+      "name":"mqtt_pass"
     },
     {
       "type":"input",

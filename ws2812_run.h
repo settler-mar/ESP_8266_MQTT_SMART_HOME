@@ -154,6 +154,8 @@ void ws2812_run_do(byte t_sec){
       #ifdef ws2812_run_analog_pin
         int level= analogRead(ws2812_run_analog_pin);
         mqtt_pub(ws2812_run_mqtt_analog,String(level));
+        Serial.print("analog ");
+        Serial.println(level);
         if(level>ws2812_run_off_analog){
           ws2812_run_status=0;
           return;
@@ -230,8 +232,12 @@ void ws2812_run_do(byte t_sec){
   if(ws2812_run_up_status!=tmp){
     ws2812_run_up_status=tmp;
 
-    mqtt_pub(ws2812_run_mqtt_up,String(ws2812_run_up_status));
-    
+    if(ws2812_run_up_status==0){
+      mqtt_pub(ws2812_run_mqtt_up,"0");  
+    }else{
+      mqtt_pub(ws2812_run_mqtt_up,"255");  
+    }
+        
     if(tmp){
       if(ws2812_run_status==0){
         ws2812_run_step=0;
@@ -249,7 +255,11 @@ void ws2812_run_do(byte t_sec){
   if(ws2812_run_dwn_status!=tmp){
     ws2812_run_dwn_status=tmp;
 
-    mqtt_pub(ws2812_run_mqtt_dwn,String(ws2812_run_dwn_status));
+    if(ws2812_run_dwn_status==0){
+      mqtt_pub(ws2812_run_mqtt_dwn,"0");  
+    }else{
+      mqtt_pub(ws2812_run_mqtt_dwn,"255");  
+    }
     
     if(tmp){
       if(ws2812_run_status==0){

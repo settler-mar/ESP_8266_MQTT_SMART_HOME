@@ -59,6 +59,12 @@ int StringToInt(String txt){
   return buf;
 }
 
+int StringToWord(String txt){
+  word buf;
+  buf=txt.toInt();
+  return buf;
+}
+
 const char* StringToChar(String txt){
  char out[txt.length()+1];
  txt.toCharArray(out, txt.length()+1);
@@ -112,7 +118,7 @@ float StringToFloat(String chislo){
     simw=chislo[i];   
   }
   if(str_l==i){
-    out=tmp.toInt();
+    out=chislo.toInt();
     return out;
   }
   

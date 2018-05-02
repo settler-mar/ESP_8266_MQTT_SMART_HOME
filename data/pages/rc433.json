@@ -1,0 +1,12 @@
+{
+  "type":"form",
+  "title":"RC433",
+  "url":"/rc433",
+  "data":[
+    {
+      "type":"input",
+      "title":"MQTT",
+      "name":"mqtt"
+    }
+  ]
+}

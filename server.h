@@ -19,6 +19,11 @@ void handleNotFound() {
 }
 
 void indexPage(){
+  #ifdef ESP_auth_def
+    if (!is_authentified(true)){
+      return;
+    }
+  #endif
   handleFileRead("/index.html");
 }
 
@@ -32,6 +37,9 @@ void main_config(){
     if(config.temp_interval<3){
       config.temp_interval=3;
     }
+    config.mqtt_user = clearString(server.arg("mqtt_user"));
+    config.mqtt_pass = clearString(server.arg("mqtt_pass"));
+    config.mqtt_name = clearString(server.arg("mqtt_name"));
     saveConfig();
   }
   
@@ -70,11 +78,15 @@ void main_config(){
 void nav_menu(){
   DynamicJsonBuffer jsonBuffer;
   JsonArray& root = jsonBuffer.createArray();
+
+  #ifdef ONE_WIRE_PORT
   {
     JsonObject& data = root.createNestedObject();
     data["title"]="OneWire";
     data["url"]="/#one-wire";
   }
+  #endif
+  
   #ifdef DHT11_PIN
     {
       JsonObject& data = root.createNestedObject();
@@ -117,6 +129,28 @@ void nav_menu(){
       data["url"]="/#ws-run";
   #endif
   
+  #ifdef MCP
+      JsonObject& data = root.createNestedObject();
+      data["title"]="mcp23017";
+      data["url"]="/#mcp23017";
+  #endif
+
+  #ifdef RC433_PORT
+    {
+      JsonObject& data = root.createNestedObject();
+      data["title"]="RC433";
+      data["url"]="/#rc433";
+    }
+  #endif
+
+  #ifdef WS_PIN
+    {
+      JsonObject& data = root.createNestedObject();
+      data["title"]="WS2812FX";
+      data["url"]="/#ws2812fx";
+    }
+  #endif
+    
   #ifdef FILE_EDIT
     {
       JsonObject& data = root.createNestedObject();
@@ -133,6 +167,13 @@ void nav_menu(){
     }
   #endif
   
+  #ifdef wifi_ota
+    {
+      JsonObject& data = root.createNestedObject();
+      data["title"]="ON OTA";
+      data["url"]="/wifi_ota";
+    }
+  #endif
 
   /*  {
       JsonObject& data = root.createNestedObject();
@@ -153,17 +194,30 @@ void nav_menu(){
   server.send ( 200, "text/html", out );*/
 }
 
+#ifdef wifi_ota
+  void wifi_ota_init(){
+    wifi_ota_run=true;
+    server.send ( 200, "text/html", "wifi_ota RUN" );
+    return;
+  }
+#endif
+
 void server_init(){
   nav_menu();
+
+  server.on ( "/*", indexPage );
   
   server.on ( "/", indexPage );
   server.on ( "/main", main_config );
-  server.on ( "/one-wire", ds_list_find );
-  server.on ( "/ds1820",ds18b20_config);
-  server.on ( "/ds2406",ds2406_config);
-  server.on ( "/ds2408",ds2408_config);
-  server.on ( "/ds2438",ds2438_config);
-  server.on ( "/ds2450",ds2450_config);
+
+  #ifdef ONE_WIRE_PORT
+    server.on ( "/one-wire", ds_list_find );
+    server.on ( "/ds1820",ds18b20_config);
+    server.on ( "/ds2406",ds2406_config);
+    server.on ( "/ds2408",ds2408_config);
+    server.on ( "/ds2438",ds2438_config);
+    server.on ( "/ds2450",ds2450_config);
+  #endif
     
   server.on ( "/restart",softRestart);
   //server.on ( "/nav.json", nav_menu);
@@ -188,6 +242,10 @@ void server_init(){
   #ifdef ws2812_run
       server.on ( "/ws_run",ws_run_config);
   #endif
+
+  #ifdef ESP_auth_def
+    server.on("/login", handleLogin);
+  #endif
   
   #ifdef FILE_EDIT
     //list directory
@@ -209,6 +267,22 @@ void server_init(){
     httpUpdater.setup(&server);
   #endif
 
+  #ifdef wifi_ota
+    server.on ( "/wifi_ota",wifi_ota_init);
+  #endif
+
+  #ifdef RC433_PORT
+    server.on ( "/rc433",rc433_config);
+  #endif
+
+  #ifdef WS_PIN
+    server.on ( "/ws2812fx",ws2812fx_config);
+  #endif
+
+  #ifdef MCP
+    server.on ( "/mcp23017",mcp23017_config);
+  #endif
+  
   server.onNotFound ( handleNotFound );
   server.begin();
   Serial.println ( "HTTP server started" );
