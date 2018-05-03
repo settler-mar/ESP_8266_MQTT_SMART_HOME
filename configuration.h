@@ -35,12 +35,13 @@
 
   #define FILE_EDIT
 
-  #define ONE_WIRE_PORT D3
+  //#define ONE_WIRE_PORT D3
   #define RC433_PORT D7
 
   #define MCP
+  #define PCA
   
-  #define wifi_firmware_update
+  //#define wifi_firmware_update
 #endif
 
 #ifdef ESP_test2

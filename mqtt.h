@@ -12,6 +12,11 @@ int subsribe;
   void mcp_mqtt(String mqtt_str08,byte j,String val_s);
 #endif
 
+#ifdef PCA
+  void pca_mqtt(String mqtt_str08,byte j,String val_s);
+#endif
+
+
 void mqtt_pub(String mqtt_addr,String data){
   if(mqtt_addr.length()<5)return;
   if(start_init) return;
@@ -103,6 +108,10 @@ void updateMQTT(String mqtt_str,String val_s){
     #ifdef MCP
       mcp_mqtt(mqtt_str08,j,val_s);
     #endif
+    #ifdef PCA
+      pca_mqtt(mqtt_str08,j,val_s);
+    #endif
+    
   }
 
   /*Проверяем данные для PID регулятора*/

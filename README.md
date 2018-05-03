@@ -14,7 +14,7 @@
 
 `#define FILE_EDIT` активирует файловый редактор
 
-`#define wifi_firmware_update` ?????????
+`#define wifi_firmware_update` обновление через фаил прошивки
 
 `#define init_debug_port D1` порт на котором при загрузке проверяется 1 для активации дебаг режима. Использую очень редко
 

@@ -1,0 +1,22 @@
+{
+  "type":"form",
+  "title":"pca9685",
+  "url":"pca9685",
+  "data":[
+    {
+      "type":"input",
+      "title":"MQTT adress analog",
+      "name":"mqtt_analog"
+    },
+    {
+      "type":"input",
+      "title":"MQTT adress угол",
+      "name":"mqtt_ang"
+    },
+    {
+      "type":"input",
+      "title":"MQTT логического состояния на выходе",
+      "name":"mqtt_d"
+    }
+  ]
+}

@@ -74,6 +74,10 @@
   #include "mcp23017.h";
 #endif
 
+#ifdef PCA
+  #include "pca9685.h";
+#endif
+
 #ifdef Alarm_mode
   #include "Alarm_modem.h"
 #endif
@@ -245,6 +249,10 @@ void setup(void){
 
   #ifdef MCP
     mcp_setup();
+  #endif
+
+  #ifdef PCA
+    pca_setup();
   #endif
 
   #ifdef wifi_ota

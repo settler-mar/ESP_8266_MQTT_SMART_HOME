@@ -135,6 +135,13 @@ void nav_menu(){
       data["url"]="/#mcp23017";
   #endif
 
+  #ifdef PCA
+      JsonObject& data_pca = root.createNestedObject();
+      data_pca["title"]="pca9685";
+      data_pca["url"]="/#pca9685";
+  #endif
+
+
   #ifdef RC433_PORT
     {
       JsonObject& data = root.createNestedObject();
@@ -282,7 +289,11 @@ void server_init(){
   #ifdef MCP
     server.on ( "/mcp23017",mcp23017_config);
   #endif
-  
+
+  #ifdef PCA
+    server.on ( "/pca9685",pca9685_config);
+  #endif
+
   server.onNotFound ( handleNotFound );
   server.begin();
   Serial.println ( "HTTP server started" );
