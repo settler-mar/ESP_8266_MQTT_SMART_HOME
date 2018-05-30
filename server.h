@@ -27,7 +27,13 @@ void indexPage(){
   handleFileRead("/index.html");
 }
 
-void softRestart(){ESP.reset();}
+#ifdef web_reboot
+  void softRestart(){
+    server.send ( 200, "text/html", "reset...." );
+    ESP.reset();
+  }
+#endif
+  
 void main_config(){
   if (server.hasArg("mqtt_server")){
     config.ssid = server.arg("ssid");
@@ -40,6 +46,10 @@ void main_config(){
     config.mqtt_user = clearString(server.arg("mqtt_user"));
     config.mqtt_pass = clearString(server.arg("mqtt_pass"));
     config.mqtt_name = clearString(server.arg("mqtt_name"));
+
+    config.update_dir = clearString(server.arg("update_dir"));
+    config.update_file = clearString(server.arg("update_file"));
+    
     saveConfig();
   }
   
@@ -180,14 +190,28 @@ void nav_menu(){
       data["title"]="ON OTA";
       data["url"]="/wifi_ota";
     }
+   #endif
+   #ifdef wifi_update
+    {
+      JsonObject& data = root.createNestedObject();
+      data["title"]="UPDATE FROM NET";
+      data["url"]="/auto_update";
+    }
+    {
+      JsonObject& data = root.createNestedObject();
+      data["title"]="UPDATE spiffs";
+      data["url"]="/auto_update_spiffs";
+    }
   #endif
 
-  /*  {
-      JsonObject& data = root.createNestedObject();
-      data["title"]="restart";
-      data["url"]="/restart";
-    }*/
-
+  #ifdef web_reboot
+  {
+    JsonObject& data = root.createNestedObject();
+    data["title"]="restart";
+    data["url"]="/restart";
+  }
+  #endif
+  
   File configFile = SPIFFS.open("/nav.json", "w");
   if (!configFile) {
     Serial.println("Failed to open config file for writing");
@@ -207,7 +231,63 @@ void nav_menu(){
     server.send ( 200, "text/html", "wifi_ota RUN" );
     return;
   }
+
 #endif
+#ifdef wifi_update
+  void auto_update_init(){
+    //ESPhttpUpdate
+    Serial.println(config.update_dir+"/"+config.update_file+".bin");
+    t_httpUpdate_return ret = ESPhttpUpdate.update(config.update_dir+"/"+config.update_file+".bin");
+    //t_httpUpdate_return  ret = ESPhttpUpdate.update("https://server/file.bin");
+
+    switch (ret) {
+      case HTTP_UPDATE_FAILED:
+        Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+        server.send ( 200, "text/html", "auto_update FAILED" );
+        Serial.println();
+        break;
+
+      case HTTP_UPDATE_NO_UPDATES:
+        Serial.println("HTTP_UPDATE_NO_UPDATES");
+        server.send ( 200, "text/html", "auto_update NO_UPDATES" );
+        break;
+
+      case HTTP_UPDATE_OK:
+        Serial.println("HTTP_UPDATE_OK");
+        server.send ( 200, "text/html", "auto_update OK" );
+        break;
+    }
+  }
+  
+  void auto_update_spiffs_init(){
+    //ESPhttpUpdate
+    if(!downloadFile(config.update_dir+"/spiffs/file_list.data","file_list.data")){
+      server.send ( 200, "text/html", "update file list FAILED" );
+      Serial.println("update file list FAILED");
+      return;
+    }
+
+    File configFile = SPIFFS.open("/file_list.data", "r");
+    if (!configFile) {
+      server.send ( 200, "text/html", "Failed to open file list for reading" );
+      Serial.println("Failed to open file list for reading");
+      return;
+    }
+    while(configFile.available()) {
+      String line = configFile.readStringUntil('\n');
+      downloadFile(config.update_dir+"/spiffs/"+line,line);
+    }
+    server.send ( 200, "text/html", "update - finish" );
+  }
+#endif
+
+void main_info(){
+  String out="";
+  out+=(String)VERSION+"\n";
+  out+=config.mqtt_name;
+
+  server.send ( 200, "text/html", out);
+}
 
 void server_init(){
   nav_menu();
@@ -216,6 +296,7 @@ void server_init(){
   
   server.on ( "/", indexPage );
   server.on ( "/main", main_config );
+  server.on ( "/info", main_info );
 
   #ifdef ONE_WIRE_PORT
     server.on ( "/one-wire", ds_list_find );
@@ -225,8 +306,10 @@ void server_init(){
     server.on ( "/ds2438",ds2438_config);
     server.on ( "/ds2450",ds2450_config);
   #endif
-    
-  server.on ( "/restart",softRestart);
+
+  #ifdef web_reboot
+    server.on ( "/restart",softRestart);
+  #endif
   //server.on ( "/nav.json", nav_menu);
 
   #ifdef DHT11_PIN
@@ -276,6 +359,11 @@ void server_init(){
 
   #ifdef wifi_ota
     server.on ( "/wifi_ota",wifi_ota_init);
+  #endif
+  
+  #ifdef wifi_update
+    server.on ( "/auto_update",auto_update_init);
+    server.on ( "/auto_update_spiffs",auto_update_spiffs_init);
   #endif
 
   #ifdef RC433_PORT

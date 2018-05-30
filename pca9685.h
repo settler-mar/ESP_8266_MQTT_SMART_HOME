@@ -54,9 +54,10 @@ void pca_load(){
 }
 
 void pca_setup() {  
-    pca_load();
+  pca_load();
   servo.servoSet(SERVO_ALL, SERVO_SG90);
   servo.begin(); 
+
   pca_init();
 
 }

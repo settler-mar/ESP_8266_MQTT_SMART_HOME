@@ -97,6 +97,8 @@ struct Config_srtuct {
   String mqtt_user;
   String mqtt_pass;
   String mqtt_name;
+  String update_dir;
+  String update_file;
 } config;
 
 byte last_sec,t_sec;

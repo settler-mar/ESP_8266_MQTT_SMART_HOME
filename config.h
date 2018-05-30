@@ -6,6 +6,8 @@ void defaultConfig(){
   config.mqtt_pass = "";
   config.mqtt_name = "ESP";
   config.temp_interval=10;
+  config.update_dir = config.mqtt_server+":1881/update";
+  config.update_file="base";
 }
 
 boolean loadConfig() {
@@ -50,6 +52,9 @@ boolean loadConfig() {
   config.mqtt_pass = clearString(configJSON["mqtt_pass"]);
   config.mqtt_name = clearString(configJSON["mqtt_name"]);
 
+  config.update_dir = clearString(configJSON["update_dir"]);
+  config.update_file = clearString(configJSON["update_file"]);
+  
   if(config.temp_interval<3)config.temp_interval=5;
   
   configJSON.prettyPrintTo(out);
@@ -70,7 +75,9 @@ void saveConfig() {
   configJSON["mqtt_user"] = config.mqtt_user;
   configJSON["mqtt_pass"] = config.mqtt_pass;
   configJSON["mqtt_name"] = config.mqtt_name;
-  
+
+  configJSON["update_dir"] = config.update_dir;
+  configJSON["update_file"] = config.update_file;
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
     Serial.println("Failed to open config file for writing");

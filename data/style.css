@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 body {
   margin: 0;
   padding: 0;
@@ -342,6 +344,9 @@ label:first-child span{
   top: -7px;
   left: 1px;
   font-size: 12px;
+}
+.no_num .radio span:after{
+  display:none;
 }
 [type=checkbox]:checked+span:before{
   content:attr(on);
@@ -750,7 +755,9 @@ form>*{
 
 @media screen and (max-width: 1025px) {
   h2:before,
-  h2:after{
+  h2:after,
+  h2 .bg:before,
+  h2 .bg:after{
     display: none;
   }
 }

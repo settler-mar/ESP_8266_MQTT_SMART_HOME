@@ -37,6 +37,16 @@
       "type":"input",
       "title":"Интервал обновления температуры (в секундах. Минимум 3.)",
       "name":"temp_interval"
+    },
+    {
+      "type":"input",
+      "title":"Папка с обновлениями",
+      "name":"update_dir"
+    },
+    {
+      "type":"input",
+      "title":"Имя файла обновлений",
+      "name":"update_file"
     }
   ]
 }

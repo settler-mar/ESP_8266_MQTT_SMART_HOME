@@ -2,6 +2,8 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+#include <ESP8266HTTPClient.h>
+
 //
 // Check the Values is between 0-255
 //
@@ -138,4 +140,45 @@ float StringToFloat(String chislo){
   return out;
 }
 
+bool downloadFile(String url,String save_to){
+  Serial.println("[HTTP] Start download " + url + " >> " + save_to);
+  bool out;
+  out=false;
+      HTTPClient http;
+
+      // configure traged server and url
+      //http.begin("https://192.168.1.12/test.html", "7a 9c f4 db 40 d3 62 5a 6e 21 bc 5c cc 66 c8 3e a1 45 59 38"); //HTTPS
+      //http.begin("http://192.168.1.12/test.html"); //HTTP
+      http.begin(url);
+
+      // start connection and send HTTP header
+      int httpCode = http.GET();
+
+      // httpCode will be negative on error
+      if(httpCode > 0) {
+          // HTTP header has been send and Server response header has been handled
+          Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+
+          // file found at server
+          if(httpCode == HTTP_CODE_OK) {
+              //String payload = http.getString();
+              //Serial.println(payload);
+              Serial.println("[HTTP] load - ok");
+              File f = SPIFFS.open("/"+save_to, "w");
+              if (!f) {
+                Serial.println("[HTTP] Failed to open file for writing");
+              }else{
+                Serial.println("[HTTP] Save - ok");
+                //f.print(payload);
+                http.writeToStream(&f);
+                f.close();
+                out=true;
+              }
+          }
+      } else {
+          Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+      }
+      http.end();
+      return out;
+} 
 #endif

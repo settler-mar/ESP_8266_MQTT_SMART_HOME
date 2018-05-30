@@ -1,14 +1,18 @@
+#define VERSION "2.0.0"
+
 //#define ESP_01
 //#define ESP_NODE_MCU
-//#define ESP_2floor
+#define ESP_2floor
 //#define ESP_GARDEN //для улицы ворота
 //#define ESP_KOTEL
 //#define ESP_2BUTTON //для зала/детской/коридора на выключатели
 //#define ESP_cherdak //чердак
 //#define run_lesnica // контролер подсветка лесницы
 //#define ESP_kitchen
-#define ESP_test
+//#define ESP_test
 #define wifi_ota
+#define wifi_update
+#define web_reboot
 
 //#define DEF_CONFIG_ON_LOAD //Загрузка конфигурации по умолчанию при старте
 //#define ESP_auth_def "admin"
@@ -18,28 +22,30 @@
 //512/128 - ESP-01 - синий
 
 //4M/1M - ESP-12 - черный
+#define FILE_EDIT
 
 //#define DEBUG_ENABLE
 #define UN_drebizg 2
 #define T_PERIOD 10 //период кратности для опроса датчиков
 #define UART_SPEAD 115200
+#define pulse_perion 10
 
 #ifdef ESP_test
   #include "ESP12_pins.h"
 
-  #define DHT11_PIN D5
+ // #define DHT11_PIN D5
 //#define DHTTYPE           DHT11     // DHT 11
-  #define DHTTYPE           DHT22     // DHT 22 (AM2302)
+ // #define DHTTYPE           DHT22     // DHT 22 (AM2302)
 //#define DHTTYPE           DHT21     // DHT 21 (AM2301)
 
 
-  #define FILE_EDIT
+  //#define FILE_EDIT
 
   //#define ONE_WIRE_PORT D3
-  #define RC433_PORT D7
+  //#define RC433_PORT D7
 
   #define MCP
-  #define PCA
+  //#define PCA
   
   //#define wifi_firmware_update
 #endif
@@ -88,13 +94,17 @@
 #endif
 
 #ifdef  ESP_2floor
-  #define DHT11_PIN D4
+  #include "ESP12_pins.h"
+
+  #define DHT11_PIN 14
   #define DHTTYPE           DHT11     // DHT 11
 //#define DHTTYPE           DHT22     // DHT 22 (AM2302)
 //#define DHTTYPE           DHT21     // DHT 21 (AM2301)
 
+  #define MCP
   #define ONE_WIRE_PORT D3
-  #define wifi_firmware_update
+  
+  //#define wifi_firmware_update
 #endif
 
 #ifdef ESP_kitchen
@@ -116,11 +126,17 @@
 #endif
 
 #ifdef ESP_GARDEN
-  #define ONE_WIRE_PORT 0
+  #include "ESP12_pins.h"
+
+  #define MCP
+  
+  #define ONE_WIRE_PORT D3
   #define DS_1820_personal_convert
 //#define init_debug_port 2
   #define RDM6300
   #define RDM6300_APARAT_UART
+
+  #define analog_pin A0
 
   #define FILE_EDIT
 #endif
@@ -149,13 +165,15 @@
 #endif
 
 #ifdef ESP_cherdak
-//1Mb/256
-  #define ONE_WIRE_PORT 0
-//#define DS_1820_personal_convert
-//#define init_debug_port 2
-//#define RDM6300
-//#define RDM6300_APARAT_UART
+  #include "ESP12_pins.h"
+  //4Mb/1
+  #define ONE_WIRE_PORT D3
 
+  #define RC433_PORT D7
+
+  #define MCP
+  #define PCA
+  
   #define FILE_EDIT
 
 //#define PID_TEMP

@@ -3,7 +3,10 @@
 Adafruit_MCP23017 mcp;
 
 word mcp_role=255;
-word mcp_invert=65280;
+word mcp_invert=0;
+word mcp_mode=0;
+word mcp_timer[16];
+//word mcp_status=0;
 String mcp_mqtt_="/test/mcp";
 
 word mcp_last_satate;
@@ -11,7 +14,7 @@ word mcp_last_satate;
   word mcp_last_satate_dreb[UN_drebizg];
   byte mcp_last_satate_dreb_cnt=0;
 #endif
-  
+
 void mcp_init(){
   if(mcp_role!=65535){
     mqtt_add_out(mcp_mqtt_+"/#");
@@ -48,6 +51,7 @@ void mcp_save(){
   root["mqtt"]=mcp_mqtt_;
   root["invert"]=mcp_invert;
   root["role"]=mcp_role;
+  root["mode"]=mcp_mode;
 
   root.printTo(configFile);
   configFile.close();
@@ -75,6 +79,7 @@ void mcp_load(){
   mcp_mqtt_ = root["mqtt"].as<String>();
   mcp_role = StringToWord(root["role"].as<String>());
   mcp_invert = StringToWord(root["invert"].as<String>());
+  mcp_mode = StringToWord(root["mode"].as<String>());
 }
 
 void mcp_setup() {  
@@ -89,33 +94,25 @@ void mcp_setup() {
 }
 
 void mcp_loop(){
-  //byte val=1;
-  /*delay(2000);
+  uint8_t buf=mcp.readGPIOAB();
+  uint8_t t_buf;
+  word val=1;
+  buf= mcp_role & buf;
 
-  for(i=0;i<16;i++){
-    mcp.digitalWrite(i, HIGH);
-  }
-  delay(2000);
-  for(i=0;i<16;i++){
-    mcp.digitalWrite(i, LOW);
-  }*/
-  /*uint8_t intf=mcp.readRegister(0x0E);
-  if(intf<16 &&  intf>0){
-    val=1;
-    for (int j=0;j<8;j++){
-      if(val & intf){
-        mqtt_pub(mcp_mqtt_+"/"+String(j), String(j));
+  if(mcp_mode>0){ 
+    word t=mcp_mode & (65535^mcp_role);
+    for (int j=0;j<16;j++){
+      if(val & t){
+        mcp_timer[j]++;
+        if(mcp_timer[j]>=pulse_perion){
+          mcp_timer[j]=0;
+          mcp.digitalWrite(j, LOW);
+        }
       }
       val=val*2;
     }
-    //mqtt_pub(ds_temp[i].mqtt.c_str(), Cel.c_str());
   }
-  Serial.println(intf);/**/
   
-
-  uint8_t buf=mcp.readGPIOAB();
-  buf= mcp_role & buf;
-  uint8_t t_buf;
   #ifdef UN_drebizg
     t_buf=buf;
     uint8_t t_buf_n=buf;
@@ -138,15 +135,21 @@ void mcp_loop(){
   //uint8_t buf = t_buf^mcp_invert;
   buf = buf ^ mcp_invert;
 
-  /*Serial.print("val: ");
+  /*Serial.print("t_buf: ");
   Serial.print(t_buf);
   Serial.print(" ");
   Serial.println(buf);/**/
   
-  byte val=1;
+  val=1;
   byte out;
-  for (int j=0;j<8;j++){
+  for (int j=0;j<16;j++){
     if(val & t_buf){
+      /*Serial.print("val: ");
+      Serial.print(val);
+      Serial.print(" ");
+      Serial.print(val & t_buf);
+      Serial.print(" ");
+      Serial.println(j);/**/
       out = (val & mcp_last_satate)?255:0;
       mqtt_pub(mcp_mqtt_+"/"+String(j), String(out));
     }
@@ -169,13 +172,20 @@ void mcp_mqtt(String mqtt_str08,byte j,String val_s){
   inv = inv & 1;
   val=val^inv;
 
-  Serial.println(val);
-  Serial.print(" ");
+  //Serial.println(val);
+  //Serial.print(" ");
   
   val=((val&1)==0?LOW:HIGH);
-  Serial.println(val);
-  Serial.println(" ");
+  //Serial.println(val);
+  //Serial.println(" ");
   mcp.digitalWrite(j, val);
+
+  if(val){
+    mcp_timer[j]=0;
+    //mcp_status=mcp_status|(1<<j);
+  }else{
+    //mcp_status=(mcp_status|(1<<j))^(1<<j);
+  }
 }
 
 void mcp23017_config(){
@@ -187,8 +197,12 @@ void mcp23017_config(){
 
     mcp_role=0;
     mcp_invert=0;
+    mcp_mode=0;
     if(server.hasArg("role")){
       mcp_role=StringToInt(server.arg("role"));
+    }
+    if(server.hasArg("mode")){
+      mcp_mode=StringToInt(server.arg("mode"));
     }
     if(server.hasArg("invert_")){
       mcp_invert=StringToInt(server.arg("invert_"));
@@ -200,6 +214,9 @@ void mcp23017_config(){
       }
       if(server.argName ( i )=="invert_[]"){
         mcp_invert=mcp_invert+StringToInt(server.arg ( i ));
+      }
+      if(server.argName ( i )=="mode[]"){
+        mcp_mode=mcp_mode+StringToInt(server.arg ( i ));
       }
     }
   }
@@ -223,6 +240,15 @@ void mcp23017_config(){
   }
   root["mqtt"]=mcp_mqtt_;
 
+  JsonArray& data3 = root.createNestedArray("mode");
+  val=1;
+  for (int j=0;j<16;j++){
+    if(val & mcp_mode){
+      data3.add(val);
+    }
+    val=val*2;
+  }
+  root["mqtt"]=mcp_mqtt_;
 
   if (server.hasArg("mqtt")){
     mcp_save();

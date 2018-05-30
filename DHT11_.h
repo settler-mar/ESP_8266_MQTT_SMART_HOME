@@ -51,6 +51,8 @@ void DHT_init(){
 }
 
 void DHT11_read(){
+  Serial.print("DHT11_read ");
+  Serial.println(dht_11.active);
   if(dht_11.active){
     sensors_event_t event;  
     dht.temperature().getEvent(&event);

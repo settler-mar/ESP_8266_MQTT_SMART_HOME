@@ -13,6 +13,7 @@
 
 #ifdef wifi_ota
   #include <ArduinoOTA.h>
+  #include <ESP8266httpUpdate.h>
   boolean wifi_ota_run=false;
 #endif
 
