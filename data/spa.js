@@ -45,6 +45,13 @@ var spa_page = (function() {
           this_page_title.innerHTML=data.title
         }
 
+        if(data.className){
+          var this_content = this_page.getElementsByClassName('content')[0];
+          if(this_content.className.indexOf(data.className)<0){
+              this_content.className+=" "+data.className;
+          }
+        }
+
         this_page.classList.add("show");
 
         if(data.nav && data.nav!=undefined){
@@ -213,11 +220,11 @@ function generateTable(pageName,data,json,echo){
   var out;
 
   var input_blk=document.querySelectorAll('#'+pageName+" .content")[0];
-  var out="<tr>";
+  var out="<thead><tr>";
   for(i=0;i<data.length;i++){
       out+="<th>"+data[i].title+"</th>"
   }
-  out+="</tr>"
+  out+="</tr></thead>"
 
 
   for(j=0;j<json.length;j++){
@@ -297,6 +304,9 @@ function generateForm(pageName,data,json,source){
         if(json.msg){
           showAlert(json.msg);
         }
+        if(json.reload){
+          location.reload();
+        }
       }
       generateForm(pageName,data,json,source)
     })
@@ -363,7 +373,16 @@ function genControl(data,json){
     txt=json[data.description]||href
 
     if(href)out+='<a href="'+href+'">'
-    out+=txt
+
+    if(data.icon){
+      out+='<span>'+txt+'</span>';
+      icon=json[data.icon];
+      if(!icon)icon="";
+      out+='<i class="'+icon+'"></i>';
+    }else{
+      out+=txt;
+    }
+
     if(href)out+='</a>'
   }
   return out;

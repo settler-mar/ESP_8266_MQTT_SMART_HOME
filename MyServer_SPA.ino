@@ -18,10 +18,15 @@
 #endif
 
 #ifdef BMP180
-  #include <Adafruit_Sensor.h>
   #include "Adafruit_BMP085.h"
   #include "BMP180.h"
 #endif
+
+#ifdef BME_280
+  #include <Adafruit_BME280.h>
+  #include "BME280.h"
+#endif
+
 
 #ifdef DHT11_PIN
   #include <DHT.h>
@@ -46,9 +51,6 @@
   #include "analog.h"
 #endif
 
-#ifdef wifi_firmware_update
-  #include "wifi_firmware_update.h"
-#endif
 
 #ifdef RDM6300
   #include "rdm6300.h"
@@ -108,7 +110,8 @@ void setup(void){
   Serial.print("Vcc ");
   Serial.println(ESP.getVcc());
 
-
+  listNetworks();
+  
   #ifdef DEBUG_ENABLE
     pinMode(init_debug_port, INPUT);
     debug_mode=false;
@@ -165,6 +168,9 @@ void setup(void){
   
   #ifdef BMP180
     BMP180_init();
+  #endif
+  #ifdef BME_280
+    BME280_init();
   #endif
 
   #ifdef analog_pin
@@ -240,9 +246,6 @@ void setup(void){
   server_init();
   initController=false;
 
-  #ifdef ESP_auth_def
-    auth_init();
-  #endif
 
   #ifdef RC433_PORT
     rc433_init();
@@ -331,6 +334,9 @@ void loop(void){
           #ifdef BMP180
             BMP180_read();
           #endif 
+          #ifdef BME_280
+            BME280_read();
+          #endif
         }
       }
 
@@ -362,7 +368,9 @@ void loop(void){
       //Serial.println();
       last_sec=t_sec;
 
+//      WiFiClient client = server.available();
       server.handleClient();
+//      server.handleClientMW(config.www_login,config.www_password,config.mqtt_server);
     }
 
     #ifdef WS_PIN

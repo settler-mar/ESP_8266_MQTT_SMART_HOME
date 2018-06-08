@@ -1,25 +1,13 @@
-String ESP_login;
-String ESP_pass;
-
-/*
-#ifdef ESP_auth_def
-  if (!is_authentified()){
-    String header = "HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n";
-    server.sendContent(header);
-    return;
-  }
-#endif
-*/
-  
-void auth_init(){
-  ESP_login=ESP_auth_def;
-  ESP_pass=ESP_pass_def;
-}
-
+String auth_ip ="";
 //Check if header is present and correct
-bool is_authentified(boolean redirect){
-  Serial.println("Enter is_authentified");
-  if (server.hasHeader("Cookie")){   
+bool is_authentified(){
+
+  String addr = server.client().remoteIP().toString();
+  if(addr==config.mqtt_server)return true;
+
+  if(auth_ip==addr)return true;
+
+  /*if (server.hasHeader("Cookie")){   
     Serial.print("Found cookie: ");
     String cookie = server.header("Cookie");
     Serial.println(cookie);
@@ -27,47 +15,70 @@ bool is_authentified(boolean redirect){
       Serial.println("Authentification Successful *");
       return true;
     }
-  }
-  if(redirect){
-    Serial.println("Authentification Failed *");
-    String header = "HTTP/1.1 301 OK\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n";
-    server.sendContent(header);
-  }
+  }*/
   return false;  
 }
 
-//login page, also called for disconnect
-void handleLogin(){
-  String msg;
-  if(is_authentified(false)){
-      String header = "HTTP/1.1 301 OK\r\nSet-Cookie: ESPSESSIONID=1\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n";
-      server.sendContent(header);
+
+void handleLogin(String uri){
+  if(uri=="/main"){
+    int method = server.method();
+    if(method == HTTP_POST && server.hasArg("user") && server.hasArg("password")){
+      Serial.println("Data_in:");
+      Serial.print("user: ");
+      Serial.println(server.arg ( "user" ));
+      Serial.print("password: ");
+      Serial.println(server.arg ( "password" ));
+      Serial.println("Data_wait:");
+      Serial.print("user: ");
+      Serial.println(config.www_login);
+      Serial.print("password: ");
+      Serial.println(config.www_password );
+
+      DynamicJsonBuffer jsonBuffer;
+      JsonObject& root = jsonBuffer.createObject();
+  
+      if(
+        (server.arg ("user")==config.www_login || config.www_login=="") && 
+        (server.arg ( "password" ) == config.www_password || config.www_password=="")
+      ){
+          root["msg"]="Login ok. Please reload page.";
+          root["reload"]=true;
+          auth_ip=server.client().remoteIP().toString();
+      }else{
+          root["msg"]="Login error.";
+      }
+
+      String out;
+      root.printTo(out);
+      server.send ( 200, "text/html", out );
+    }
   }
-  if (server.hasHeader("Cookie")){   
-    Serial.print("Found cookie: ");
-    String cookie = server.header("Cookie");
-    Serial.println(cookie);
+  
+  if(!handleFileRead("/index.html")){
+    server.send(404, "text/plain", "FileNotFound");
   }
-  if (server.hasArg("DISCONNECT")){
-    Serial.println("Disconnection");
-    String header = "HTTP/1.1 301 OK\r\nSet-Cookie: ESPSESSIONID=0\r\nLocation: /login\r\nCache-Control: no-cache\r\n\r\n";
-    server.sendContent(header);
+}
+
+void loginRoute(){
+  String uri = server.uri();
+  if(isStatic(uri)){
+    if(!handleFileRead(uri)){
+      server.send(404, "text/plain", "FileNotFound");
+    }
     return;
   }
-  if (server.hasArg("USERNAME") && server.hasArg("PASSWORD")){
-    if (server.arg("USERNAME") == ESP_login &&  server.arg("PASSWORD") == ESP_pass ){
-      String header = "HTTP/1.1 301 OK\r\nSet-Cookie: ESPSESSIONID=1\r\nLocation: /\r\nCache-Control: no-cache\r\n\r\n";
-      server.sendContent(header);
-      Serial.println("Log in Successful");
-      return;
+ 
+  if(uri.endsWith(".json")){
+    if(!handleFileRead("/pages/login.json")){
+      server.send(404, "text/plain", "FileNotFound");
     }
-    msg = "Wrong username/password! try again.";
-    Serial.println("Log in Failed");
+    return;
   }
-  String content = "<html><body><form action='/login' method='POST'>LOGIN<br>";
-  content += "User:<input type='text' name='USERNAME' placeholder='user name'><br>";
-  content += "Password:<input type='password' name='PASSWORD' placeholder='password'><br>";
-  content += "<input type='submit' name='SUBMIT' value='Submit'></form>" + msg + "<br>";
-  content += "</body></html>";
-  server.send(200, "text/html", content);
+
+  Serial.print("login route: ");
+  Serial.println(uri);
+
+  handleLogin(uri);
+  return;
 }

@@ -1,0 +1,20 @@
+{
+  "type":"form",
+  "title":"BME280",
+  "url":"/bme280",
+  "data":[
+    {
+      "type":"input",
+      "title":"MQTT for tem",
+      "name":"mqtt_temp"
+    },{
+      "type":"input",
+      "title":"MQTT fot Pressure",
+      "name":"mqtt_pre"
+    },{
+      "type":"input",
+      "title":"MQTT fot humidity",
+      "name":"mqtt_hum"
+    }
+  ]
+}

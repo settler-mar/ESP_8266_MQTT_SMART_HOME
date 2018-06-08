@@ -14,6 +14,10 @@ String formatBytes(size_t bytes){
 }
 
 void handleFileUpload(){
+  #ifdef ESP_auth_def
+    if(!is_authentified()) return;
+  #endif
+  
   if(server.uri() != "/edit") return;
   HTTPUpload& upload = server.upload();
   if(upload.status == UPLOAD_FILE_START){
@@ -32,6 +36,8 @@ void handleFileUpload(){
       fsUploadFile.close();
     Serial.print("handleFileUpload Size: ");
     Serial.println(upload.totalSize);
+    Serial.print("handleFileUpload to: ");
+    Serial.println(upload.filename);
   }
 }
 

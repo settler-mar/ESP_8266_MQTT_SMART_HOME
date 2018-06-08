@@ -180,5 +180,53 @@ bool downloadFile(String url,String save_to){
       }
       http.end();
       return out;
-} 
+}
+
+String printEncryptionType(int thisType) {
+  // read the encryption type and print out the name:
+  switch (thisType) {
+    case ENC_TYPE_WEP:
+      return("WEP");
+    case ENC_TYPE_TKIP:
+      return("WPA");
+    case ENC_TYPE_CCMP:
+      return ("WPA2");
+    case ENC_TYPE_NONE:
+      return ("None");
+    case ENC_TYPE_AUTO:
+      return("Auto");
+  }
+}
+
+void listNetworks() {
+  String out;
+  // scan for nearby networks:
+  Serial.println("** Scan Networks **");
+  int numSsid = WiFi.scanNetworks();
+  if (numSsid == -1) {
+    Serial.println("Couldn't get a wifi connection");
+    return;
+  }
+
+  // print the list of networks seen:
+  Serial.print("number of available networks:");
+  Serial.println(numSsid);
+
+  // print the network number and name for each network found:
+  for (int thisNet = 0; thisNet < numSsid; thisNet++) {
+    String enc=printEncryptionType(WiFi.encryptionType(thisNet));
+    out+=(String)WiFi.SSID(thisNet)+"\t"+(String)WiFi.RSSI(thisNet)+"\t"+(String)WiFi.channel(thisNet)+"\t"+(String)WiFi.BSSIDstr(thisNet)+"\t"+enc+"\n";
+    Serial.print(thisNet);
+    Serial.print(") ");
+    Serial.print(WiFi.SSID(thisNet));
+    Serial.print("\tSignal: ");
+    Serial.print(WiFi.RSSI(thisNet));
+    Serial.print(" dBm");
+    Serial.print("\tEncryption: ");
+    Serial.println(enc);
+  }
+
+  server.send ( 200, "text/html", out);
+}
+
 #endif

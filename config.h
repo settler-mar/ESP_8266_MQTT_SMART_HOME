@@ -1,3 +1,5 @@
+#define VERSION "2.0.4"
+
 void defaultConfig(){
   config.ssid = "Settler";
   config.password = "332018334";
@@ -6,11 +8,30 @@ void defaultConfig(){
   config.mqtt_pass = "";
   config.mqtt_name = "ESP";
   config.temp_interval=10;
-  config.update_dir = config.mqtt_server+":1881/update";
+  config.update_dir = "http://"+config.mqtt_server+":1881/update";
   config.update_file="base";
+
+  config.www_login="admin";
+  config.www_password="admin";
+
+  /*
+  config.ssid = WIFI_SSID;
+  config.password = WIFI_PASSWORD;
+  config.mqtt_server = "192.168.0.108";
+  config.mqtt_user = "";
+  config.mqtt_pass = "";
+  config.mqtt_name = MQTT_NAME;
+  config.temp_interval=10;
+  config.update_dir = UPDATE_DIR;
+  config.update_file=UPDATE_FILE;
+  config.www_login = WWW_LOGIN;
+  config.www_password=WWW_PASS;
+   */
 }
 
 boolean loadConfig() {
+  defaultConfig();
+  
   String out;
   File configFile = SPIFFS.open("/config.json", "r");
   if (!configFile) {
@@ -54,7 +75,14 @@ boolean loadConfig() {
 
   config.update_dir = clearString(configJSON["update_dir"]);
   config.update_file = clearString(configJSON["update_file"]);
-  
+
+  if (configJSON.containsKey("www_login")) {
+    config.www_login = StringToCharH(configJSON["www_login"]);
+  }
+  if (configJSON.containsKey("www_password")) {
+    config.www_password = StringToCharH(configJSON["www_password"]);
+  }
+
   if(config.temp_interval<3)config.temp_interval=5;
   
   configJSON.prettyPrintTo(out);
@@ -78,6 +106,10 @@ void saveConfig() {
 
   configJSON["update_dir"] = config.update_dir;
   configJSON["update_file"] = config.update_file;
+
+  configJSON["www_login"] = config.update_dir;
+  configJSON["www_password"] = config.update_file;
+  
   File configFile = SPIFFS.open("/config.json", "w");
   if (!configFile) {
     Serial.println("Failed to open config file for writing");

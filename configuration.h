@@ -1,15 +1,13 @@
-#define VERSION "2.0.0"
-
 //#define ESP_01
 //#define ESP_NODE_MCU
-#define ESP_2floor
+//#define ESP_2floor
 //#define ESP_GARDEN //для улицы ворота
 //#define ESP_KOTEL
 //#define ESP_2BUTTON //для зала/детской/коридора на выключатели
 //#define ESP_cherdak //чердак
 //#define run_lesnica // контролер подсветка лесницы
 //#define ESP_kitchen
-//#define ESP_test
+#define ESP_test
 #define wifi_ota
 #define wifi_update
 #define web_reboot
@@ -30,8 +28,11 @@
 #define UART_SPEAD 115200
 #define pulse_perion 10
 
+#define ESP_auth_def
+
 #ifdef ESP_test
-  #include "ESP12_pins.h"
+  #define ESP12_pins
+  
 
  // #define DHT11_PIN D5
 //#define DHTTYPE           DHT11     // DHT 11
@@ -44,10 +45,9 @@
   //#define ONE_WIRE_PORT D3
   //#define RC433_PORT D7
 
-  #define MCP
+  //#define MCP
   //#define PCA
   
-  //#define wifi_firmware_update
 #endif
 
 #ifdef ESP_test2
@@ -69,12 +69,13 @@
 #endif
 
 #ifdef ESP_NODE_MCU
+  #define ESP12_pins
   #define DHT11_PIN D5
 //#define DHTTYPE           DHT11     // DHT 11
   #define DHTTYPE           DHT22     // DHT 22 (AM2302)
 //#define DHTTYPE           DHT21     // DHT 21 (AM2301)
 
-  #define BMP180 // 1 - Pa 2 - mm rt st
+  #define BMP180 2// 1 - Pa 2 - mm rt st
 //#define analog_pin A0
 
 //#define RDM6300
@@ -88,13 +89,12 @@
   #define DS_1820_personal_convert
 //#define init_debug_port D1
 
-  #define wifi_firmware_update
 
   #define Alarm_mode
 #endif
 
 #ifdef  ESP_2floor
-  #include "ESP12_pins.h"
+  #define ESP12_pins
 
   #define DHT11_PIN 14
   #define DHTTYPE           DHT11     // DHT 11
@@ -104,17 +104,19 @@
   #define MCP
   #define ONE_WIRE_PORT D3
   
-  //#define wifi_firmware_update
 #endif
 
 #ifdef ESP_kitchen
-  #define DHT11_PIN D5
+  #define ESP12_pins
+  #define DHT11_PIN 14
 //#define DHTTYPE           DHT11     // DHT 11
   #define DHTTYPE           DHT22     // DHT 22 (AM2302)
 //#define DHTTYPE           DHT21     // DHT 21 (AM2301)
 
-  #define BMP180 // 1 - Pa 2 - mm rt st
+  #define BMP180 2 // 1 - Pa 2 - mm rt st
 //#define analog_pin A0
+//  #define BME_280 2
+//  #define BME_280_ADDR 0x76
 
   #define FILE_EDIT
 
@@ -122,11 +124,10 @@
 
   #define RC433_PORT D7
 
-//#define wifi_firmware_update
 #endif
 
 #ifdef ESP_GARDEN
-  #include "ESP12_pins.h"
+  #define ESP12_pins
 
   #define MCP
   
@@ -165,7 +166,7 @@
 #endif
 
 #ifdef ESP_cherdak
-  #include "ESP12_pins.h"
+  #define ESP12_pins
   //4Mb/1
   #define ONE_WIRE_PORT D3
 

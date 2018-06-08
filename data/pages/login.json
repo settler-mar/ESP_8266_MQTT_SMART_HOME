@@ -1,0 +1,17 @@
+{
+  "type":"form",
+  "title":"Авторизация",
+  "submitName":"Войти",
+  "data":[
+    {
+      "type":"input",
+      "title":"Login",
+      "name":"user"
+    },
+    {
+      "type":"password",
+      "title":"Password",
+      "name":"password"
+    }
+  ]
+}

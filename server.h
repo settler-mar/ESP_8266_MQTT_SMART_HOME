@@ -19,11 +19,6 @@ void handleNotFound() {
 }
 
 void indexPage(){
-  #ifdef ESP_auth_def
-    if (!is_authentified(true)){
-      return;
-    }
-  #endif
   handleFileRead("/index.html");
 }
 
@@ -111,6 +106,13 @@ void nav_menu(){
       data["url"]="/#bmp180";
     }
   #endif
+  #ifdef BME_280
+    {
+      JsonObject& data = root.createNestedObject();
+      data["title"]="BME280";
+      data["url"]="/#bme280";
+    }
+  #endif
   #ifdef analog_pin
     {
       JsonObject& data = root.createNestedObject();
@@ -176,13 +178,6 @@ void nav_menu(){
     }
   #endif
 
-  #ifdef wifi_firmware_update
-    {
-      JsonObject& data = root.createNestedObject();
-      data["title"]="update";
-      data["url"]="/update";
-    }
-  #endif
   
   #ifdef wifi_ota
     {
@@ -282,107 +277,293 @@ void nav_menu(){
 #endif
 
 void main_info(){
-  String out="";
+  String out="Mhome\n";
   out+=(String)VERSION+"\n";
-  out+=config.mqtt_name;
-
+  out+=config.mqtt_name+"\n";
+  out+=(String)ESP.getChipId()+"\n";
+  out+=(String)ESP.getFlashChipRealSize()+"\n";
+  out+=(String)ESP.getFlashChipSpeed()+"\n";
+  out+=(String)ESP.getVcc()+"\n";
+  out+=(String)WiFi.SSID()+"\n";
+  out+=(String)WiFi.RSSI()+"\n";
+  
   server.send ( 200, "text/html", out);
 }
 
-void server_init(){
-  nav_menu();
+void firmware_config(){
+  String out="";
 
-  server.on ( "/*", indexPage );
-  
-  server.on ( "/", indexPage );
-  server.on ( "/main", main_config );
-  server.on ( "/info", main_info );
-
-  #ifdef ONE_WIRE_PORT
-    server.on ( "/one-wire", ds_list_find );
-    server.on ( "/ds1820",ds18b20_config);
-    server.on ( "/ds2406",ds2406_config);
-    server.on ( "/ds2408",ds2408_config);
-    server.on ( "/ds2438",ds2438_config);
-    server.on ( "/ds2450",ds2450_config);
+  //out+=(String)VERSION+"\n";
+  //out+=config.mqtt_name;
+  #ifdef DEBUG_ENABLE
+  out+="#define DEBUG_ENABLE\n";
+  #endif
+  #ifdef ESP12_pins
+  out+="#define ESP12_pins\n";
+  #endif
+  #ifdef wifi_ota
+  out+="#define wifi_ota\n";
+  #endif
+  #ifdef wifi_update
+  out+="#define wifi_update\n";
   #endif
 
   #ifdef web_reboot
-    server.on ( "/restart",softRestart);
+  out+="#define web_reboot\n";
   #endif
-  //server.on ( "/nav.json", nav_menu);
+  #ifdef FILE_EDIT
+  out+="#define FILE_EDIT\n";
+  #endif
+  #ifdef UN_drebizg
+  out+="#define UN_drebizg "+(String)UN_drebizg+"\n";
+  #endif
+  #ifdef T_PERIOD
+  out+="#define T_PERIOD "+(String)T_PERIOD+"\n";
+  #endif
+  #ifdef UART_SPEAD
+  out+="#define UART_SPEAD "+(String)UART_SPEAD+"\n";
+  #endif
+  #ifdef pulse_perion
+  out+="#define pulse_perion "+(String)pulse_perion+"\n";
+  #endif
+  #ifdef ESP_auth_def
+  out+="#define ESP_auth_def\n";
+  #endif
 
+
+  File configFile = SPIFFS.open("/config.json", "r");
+  if (!configFile) {
+    Serial.println("Failed to open config file");
+    return ;
+  }
+
+  size_t size = configFile.size();
+  if (size > 1024) {
+    Serial.println("Config file size is too large");
+    return;
+  }
+
+  // Allocate a buffer to store contents of the file.
+  std::unique_ptr<char[]> buf(new char[size]);
+
+  configFile.readBytes(buf.get(), size);
+
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& configJSON = jsonBuffer.parseObject(buf.get());
+
+  if (!configJSON.success()) {
+    Serial.println("Failed to parse config file");
+    return;
+  }
+
+  out+="#define WIFI_SSID \""+clearString(configJSON["ssid"])+"\"\n";
+  out+="#define WIFI_PASSWORD \""+clearString(configJSON["password"]) +"\"\n";
+  out+="#define MQTT_NAME \""+config.mqtt_name+"\"\n";
+  out+="#define UPDATE_DIR \""+config.update_dir+"\"\n";
+  out+="#define UPDATE_FILE \""+config.update_file+"\"\n";
+  out+="#define WWW_LOGIN \""+String(config.www_login)+"\"\n";
+  out+="#define WWW_PASS \""+String(config.www_password)+"\"\n";
+  
+  #ifdef ONE_WIRE_PORT
+  out+="#define ONE_WIRE_PORT "+(String)ONE_WIRE_PORT+"\n";
+    #ifdef DS_1820_personal_convert
+      out+="#define DS_1820_personal_convert\n";
+    #endif
+  #endif
+  
   #ifdef DHT11_PIN
-    server.on ( "/dht11",dht11_config);
+  out+="#define DHT11_PIN "+(String)DHT11_PIN+"\n";
+    #ifdef DHTTYPE
+    out+="#define DHTTYPE "+(String)DHTTYPE+"\n";
+    #endif
   #endif
+  
   #ifdef BMP180
-    server.on ( "/bmp180",bmp180_config);
+  out+="#define BMP180 "+(String)BMP180+"\n";
   #endif
+  #ifdef BME_280
+    out+="#define BME_280 "+(String)BME_280+"\n";
+    #ifdef BME_280_ADDR
+      out+="#define BME_280_ADDR "+(String)BME_280_ADDR+"\n";
+    #endif
+  #endif
+  
   #ifdef analog_pin
-    server.on ( "/analog",analog_config);
+  out+="#define analog_pin "+(String)analog_pin+"\n";
   #endif
+
+  #ifdef MCP
+      out+="#define MCP "+(String)MCP+"\n";
+  #endif
+
+  #ifdef PCA
+      out+="#define PCA "+(String)PCA+"\n";
+  #endif
+
+  #ifdef RC433_PORT
+    out+="#define RC433_PORT "+(String)RC433_PORT+"\n";
+  #endif
+
+  
   #ifdef RDM6300
-   server.on ( "/rdm6300",rdm6300_config);
+    out+="#define RDM6300\n";
+    #ifdef RDM6300_APARAT_UART
+    out+="#define RDM6300_APARAT_UART\n";
+    #endif
+     #ifdef RDM6300_SOFT_UART_RX
+    out+="#define RC433_PORT "+(String)RDM6300_SOFT_UART_RX+"\n";
+    #endif
+    #ifdef RDM6300_SOFT_UART_TX
+    out+="#define RC433_PORT "+(String)RDM6300_SOFT_UART_TX+"\n";
+    #endif
   #endif
 
   #ifdef PID_TEMP
-     server.on ( "/pid_temp",pid_temp_config);
+    out+="#define PID_TEMP\n";
+  #endif
+
+  #ifdef ws2812_run 
+    out+="#define ws2812_run\n";
+    out+="#define PIN_ws "+(String)PIN_ws+"\n";
+    out+="#define NUMPIXELS "+(String)NUMPIXELS+"\n";
+    #ifdef ws2812_run_up_pin
+    out+="#define ws2812_run_up_pin "+(String)ws2812_run_up_pin+"\n";
+    #endif
+    #ifdef ws2812_run_dwn_pin
+    out+="#define RC433_PORT "+(String)ws2812_run_dwn_pin+"\n";
+    #endif
+    #ifdef ws2812_run_analog_pin
+    out+="#define ws2812_run_analog_pin "+(String)ws2812_run_analog_pin+"\n";
+    #endif
+  #endif
+  
+  #ifdef WS_PIN
+    out+="#define WS_PIN "+(String)WS_PIN+"\n";
+    out+="#define WS_LED_COUNT "+(String)WS_LED_COUNT+"\n";
+  #endif
+
+  
+  server.send ( 200, "text/html", out);
+}
+
+
+void HTTP_route(){
+  String uri = server.uri();
+  int method = server.method();
+  //String ip = 
+
+  #ifdef ESP_auth_def
+   if (!is_authentified()){
+      loginRoute();
+      return;
+    }
+  #endif
+    
+  if(uri == "/main")return main_config ();
+  if(uri == "/info")return main_info ();
+  if(uri == "/firmware_config")return firmware_config ();
+  if(uri == "/networks")return listNetworks ();
+
+  #ifdef ONE_WIRE_PORT
+    if(uri == "/one-wire")return ds_list_find ();
+    if(uri == "/ds1820")return ds18b20_config();
+    if(uri == "/ds2406")return ds2406_config();
+    if(uri == "/ds2408")return ds2408_config();
+    if(uri == "/ds2438")return ds2438_config();
+    if(uri == "/ds2450")return ds2450_config();
+  #endif
+
+  #ifdef web_reboot
+    if(uri == "/restart")return softRestart();
+  #endif
+  //if(uri == "/nav.json")return nav_menu);
+
+  #ifdef DHT11_PIN
+    if(uri == "/dht11")return dht11_config();
+  #endif
+  #ifdef BMP180
+    if(uri == "/bmp180")return bmp180_config();
+  #endif
+  #ifdef BME_280
+    if(uri == "/bme280")return bme280_config();
+  #endif
+  #ifdef analog_pin
+    if(uri == "/analog")return analog_config();
+  #endif
+  #ifdef RDM6300
+   if(uri == "/rdm6300")return rdm6300_config();
+  #endif
+
+  #ifdef PID_TEMP
+     if(uri == "/pid_temp")return pid_temp_config();
   #endif
 
   #ifdef ws2812_run
-      server.on ( "/ws_run",ws_run_config);
-  #endif
-
-  #ifdef ESP_auth_def
-    server.on("/login", handleLogin);
+      if(uri == "/ws_run")return ws_run_config();
   #endif
   
   #ifdef FILE_EDIT
     //list directory
-    server.on("/list", HTTP_GET, handleFileList);
+    if(uri == "/list" && method==HTTP_GET)return handleFileList();
     //load editor
-    server.on("/edit", HTTP_GET, [](){
+    if(uri == "/edit" && method==HTTP_GET){
       if(!handleFileRead("/edit.htm")) server.send(404, "text/plain", "FileNotFound");
-    });
+      return;
+    };
     //create file
-    server.on("/edit", HTTP_PUT, handleFileCreate);
+    if(uri == "/edit" && method==HTTP_PUT)return handleFileCreate();
     //delete file
-    server.on("/edit", HTTP_DELETE, handleFileDelete);
+    if(uri == "/edit" && method==HTTP_DELETE) return handleFileDelete();
+    //first callback is called after the request has ended with all parsed arguments
+    //second callback handles file uploads at that location
+    /*if(uri == "/edit" && method==HTTP_POST){ 
+      handleFileUpload();
+      server.send(200, "text/plain", ""); 
+      return;
+    }*/
+  #endif
+  
+
+  #ifdef wifi_ota
+    if(uri == "/wifi_ota")return wifi_ota_init();
+  #endif
+  
+  #ifdef wifi_update
+    if(uri == "/auto_update")return auto_update_init();
+    if(uri == "/auto_update_spiffs")return auto_update_spiffs_init();
+  #endif
+
+  #ifdef RC433_PORT
+    if(uri == "/rc433")return rc433_config();
+  #endif
+
+  #ifdef WS_PIN
+    if(uri == "/ws2812fx")return ws2812fx_config();
+  #endif
+
+  #ifdef MCP
+    if(uri == "/mcp23017")return mcp23017_config();
+  #endif
+
+  #ifdef PCA
+    if(uri == "/pca9685")return pca9685_config();
+  #endif
+
+  handleNotFound ();
+}
+
+void server_init(){
+  nav_menu();
+  
+  server.on ( "/", indexPage );
+
+  #ifdef FILE_EDIT
     //first callback is called after the request has ended with all parsed arguments
     //second callback handles file uploads at that location
     server.on("/edit", HTTP_POST, [](){ server.send(200, "text/plain", ""); }, handleFileUpload);
   #endif
   
-  #ifdef wifi_firmware_update
-    httpUpdater.setup(&server);
-  #endif
-
-  #ifdef wifi_ota
-    server.on ( "/wifi_ota",wifi_ota_init);
-  #endif
-  
-  #ifdef wifi_update
-    server.on ( "/auto_update",auto_update_init);
-    server.on ( "/auto_update_spiffs",auto_update_spiffs_init);
-  #endif
-
-  #ifdef RC433_PORT
-    server.on ( "/rc433",rc433_config);
-  #endif
-
-  #ifdef WS_PIN
-    server.on ( "/ws2812fx",ws2812fx_config);
-  #endif
-
-  #ifdef MCP
-    server.on ( "/mcp23017",mcp23017_config);
-  #endif
-
-  #ifdef PCA
-    server.on ( "/pca9685",pca9685_config);
-  #endif
-
-  server.onNotFound ( handleNotFound );
+  server.onNotFound ( HTTP_route );
   server.begin();
   Serial.println ( "HTTP server started" );
 }
