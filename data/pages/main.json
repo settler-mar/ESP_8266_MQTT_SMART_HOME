@@ -47,6 +47,16 @@
       "type":"input",
       "title":"Имя файла обновлений",
       "name":"update_file"
+    },
+    {
+      "type":"input",
+      "title":"Имя администратора устройства",
+      "name":"www_login"
+    },
+    {
+      "type":"input",
+      "title":"Пароль администратора устройства",
+      "name":"www_password"
     }
   ]
 }
